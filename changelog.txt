@@ -1,0 +1,115 @@
+03.03.2021
+  - created new GtiHub repositories for better integration
+  - integrated the option to skip the calculation of the phylogenetic tree
+
+27.10.2020
+  - discovered a bug within the creation of the abundance tables for a specific taxonomic rank
+    - started fixing the bug by replacing the faulty code with a new algorithm
+
+23.10.2020
+  - added cooccurance table as datatable into the visualisation
+
+15.10.2020
+  - implemented complete cooccur calculation into main algorithm
+  - tested displaying of cooccur pair data as table
+  - set limit for cooccur matrix display to topX = 80
+
+14.10.2020
+  - implemented plotting of cooccur into the app
+
+12.10.2020
+  - reworked cooccurance
+  - implemented cooccur package
+  - fixed bugs relating to the cooccur package
+
+06.10.2020
+  - added coocurance algorithm into the main ngs algorithm
+
+01.10.2020
+  - worked on algorithm to create coocurance network for Family, Genus, Order etc
+
+29.09.2020
+  - added basic cooccurance network
+
+24.09.2020
+  - added ordination method choice to heatmap
+
+22.09.2020
+  - fixed a bug with the loading of the IlluminaAnalysis.RData file needed for data visualization
+  - added options to the tree Plot
+    - hidable label tips
+    - Polar Coordinates
+    - abundance within samples
+
+16.09.2020
+  - added a save button for the plots
+  - fixed the file rename alorithm for more natural sample display within plots
+  - added optional relative abundance
+  - added plots folder
+
+15.09.2020
+  - added reactive plot options
+  - added phylogenetic tree
+  - added SampleName resorting
+
+10.09.2020
+  - fixed the folder selection prompts
+  - added more error messages for the folder selection
+  - added the algorithm options in the data analysis tab of the beta app
+
+08.09.2020
+  - changed the intro of the beta app
+  - set up an easy to start executable for the app
+
+03.09.2020
+  - added debug save file
+  - created app beta version with plot visualisation
+
+28.08.2020
+  - added timeLog for usability
+  - fixed app breaking bug withing tree construction routine
+  - fixed a tooltip bug
+  - updated intro text
+
+25.08.2020
+  - started adding a distance matrix for the creation of a phylogenetic tree
+
+13.08.2020
+  - fixed bug withing the choice of seperate or complete analysis
+  - reordered the options layout
+  - added taxonomy functionality
+  - added taxonomy options
+  - added Sys.time and time of process
+
+12.08.2020
+  - added sessionInfo and a session Info save
+  - added Introtext
+  - added input for seperate and complete analysis
+
+11.08.2020
+  - fixed all updated r packages
+  - included status reports inApp
+
+10.08.2020
+  - added taxonomy subfunction
+  - updated all r packages
+
+06.08.2020
+  - continued to work on shiny shell
+    - linked the shiny input sliders with the NGS-functions
+  - initiated git upload via RStudio
+
+04.08.2020
+  - added SanityTrackTable to the NGS function
+  - created shiny shell for UI
+
+30.07.2020
+  - fixed default input path
+  - added feedback prints
+  - added a save csv containing the Non Chimera Sequencens as well as their abundance
+  - added creation of filesystem and overhauled the input path
+    -> output_path is no longer needed
+
+28.07.2020
+  - created new script with comments
+  - new script is intended to work as a function with variable fastq input files.

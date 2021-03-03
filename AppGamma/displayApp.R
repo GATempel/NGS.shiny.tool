@@ -42,6 +42,8 @@ require("DT")
 require("cooccur")
 # plotly for the displaying of interactive plotly plots
 require("plotly")
+# NGS.shiny.helper for a variety of helper functions
+require("NGS.shiny.helper")
 
 
 # load the internal html files
@@ -371,12 +373,12 @@ server <- function(input, output, session) {
 
   output$plot <- renderPlotly({
     if (input$VisC == "BarP") {
-      AppHelper::plot_barplot(genera = get(input$TRankC),
+      NGS.shiny.helper::plot_barplot(genera = get(input$TRankC),
                               samples = input$SampleC,
                               cutoff = input$TopX,
                               modus = input$BarMode)
     } else if (input$VisC == "hmap") {
-      AppHelper::plot_heatmap(genera = get(input$TRankC),
+      NGS.shiny.helper::plot_heatmap(genera = get(input$TRankC),
                               samples = input$SampleC,
                               lowercutoff = input$TopX[1],
                               uppercutoff = input$TopX[2])

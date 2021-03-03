@@ -36,8 +36,8 @@ require("shinyBS")
 require("shinyjs")
   # readr is used for advanced file reading
 require("readr")
-  # AppHelper for the main IlluminaAnalysis function
-require("AppHelper")
+  # NGS.shiny.helper for the main IlluminaAnalysis function
+require("NGS.shiny.helper")
 
 # load html files into variables
 Error000 <- read_file("./internal_files/html/Error000.html")
@@ -208,6 +208,10 @@ server <- function(input, output, session) {
                # checkbox to activate resorting of the Samples
                checkboxInput("resort",
                              "Resort Sample names",
+                             value = FALSE),
+               # checkbox to activate the calcutalion of the phylogenetic tree
+               checkboxInput("skipTree",
+                             "Skip calculation of phylogenetic tree",
                              value = FALSE)
                ),
         column(6,
@@ -387,6 +391,20 @@ server <- function(input, output, session) {
             defaultTooltip
           }))
 
+  # Tooltip of the resort button
+  onevent("mouseenter",
+          "skipTree",
+          output$Tooltip <- renderText({
+            "Check this to save time calculating. It will skip the calculation of
+            the phylogenetic tree as this takes the most time due to the creation of
+            a distance matrix."
+          }))
+  onevent("mouseleave",
+          "skipTree",
+          output$Tooltip <- renderText({
+            defaultTooltip
+          }))
+
   # Tooltip of the EEforward numeric Input
   onevent("mouseenter",
           "EEforward",
@@ -512,7 +530,8 @@ server <- function(input, output, session) {
                  Ttrainer <- paste0("./internal_files/taxa_trainer/",
                                     input$trainer)
                  rsort <- input$resort
-                 AppHelper::illumina_analysis(
+                 treeskipping <- input$skipTree
+                 NGS.shiny.helper::illumina_analysis(
                    input_path = folderpath,
                    trunc_forw = truF,
                    trim_left_forw = trilF,
@@ -522,7 +541,8 @@ server <- function(input, output, session) {
                    EEforward = EEF,
                    EEreverse = EER,
                    tax_trainer = Ttrainer,
-                   resort = rsort)
+                   resort = rsort,
+                   skipTree = treeskipping)
                },
                message = function(mess){
                  shinyjs::html(id = "Status",
