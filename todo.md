@@ -1,5 +1,8 @@
 todo:
 
+- [ ] imidiate toDo:
+  - [ ] display tree and options
+
 - [ ] dada script (functionality):
   - [ ] integrate the functionality to disable the script breaking occuring when the Kingdom determination is NA
   - [x] implement file.exists into taxonomy analysis for folder creation

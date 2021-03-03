@@ -382,6 +382,8 @@ server <- function(input, output, session) {
                               samples = input$SampleC,
                               lowercutoff = input$TopX[1],
                               uppercutoff = input$TopX[2])
+    } else if (input$ VisC == "ptree") {
+
     }
   })
 
