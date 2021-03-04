@@ -33,6 +33,7 @@ todo:
     - [x] tab for plots
   - [ ] estimated time of end
   - [x] systime
+  - [ ] include a select all / deselect all option for the sample selection in the display app if possible
 - other things
   - [ ] kontinuierliche Integration
   - [ ] markdown report

@@ -73,6 +73,9 @@ ui <- tagList(
 #------------------------------------------------------------------------------------>Server Functions
 server <- function(input, output, session) {
   #------------------------------------------------------->Data Visualization UI
+  # data visualisation contains a basic siebar and a main panel with the sidebar
+  # containing the selectable options to define what to display within the main
+  # panel
   output$DataVisual <- renderUI({
     fluidPage(
       sidebarLayout(
@@ -107,6 +110,10 @@ server <- function(input, output, session) {
     )
   })
 
+  # second sidebar element
+  # is anly enabled if a folder containing a "IlluminaAnalysis.RData" file was
+  # selected - this element enables the selection of what to display in the main
+  # panel
   output$DVside2 <- renderUI({
     if (Status() == "acceptable"){
       fluidPage(
@@ -135,11 +142,16 @@ server <- function(input, output, session) {
 
   output$SampleSelect <- renderUI({
     # render the UI depending on the chosen display variant - all choices
-    # except the data Table give the options to choose the samples which should
+    # the selection of which Samples to visualize is disabled for the Co-occurance
+    # and the phylogenetic tree
     # be analyzed as well as the dimensions of the plot within the mainpanel
-    if (input$VisC != "CoocDT"){
+    if (!(input$VisC %in% c("CoocDT", "CoocOV", "ptree"))){
       fluidPage(
         fluidRow(
+          # generates a checkbox Input enabling the selection of samples that are to
+          # be included in the visualisation - the choices presented will depend
+          # on the loaded IlluminaAnalysis.RData file in the previously selected
+          # folder and the CompletePhyl object contained within that file
           column(12,
                  checkboxGroupInput(
                    "SampleC",
@@ -153,7 +165,9 @@ server <- function(input, output, session) {
                  )
         ),
         fluidRow(
-          # another sub Ui dependent on the user input
+          # a subUI that will enable the choice of how many of the most abundant
+          # sequence are to be included in the plot - the subUI will vary depending
+          # on what the user chose to display
           uiOutput("TopXSelect")
         ),
         fluidRow(
@@ -178,7 +192,11 @@ server <- function(input, output, session) {
           )
         )
       )
-    } else {
+    # if the chosen visualization is the Co-occurance datatable the sidebar will
+    # contain the choice to select a taxonomic rank and depending on this choice
+    # another subUI element containing the choice of which member of the chosen
+    # taxonomic rank to inspect
+    } else if (input$VisC == "CoocDT") {
       TRank <- colnames(CompletePhyl@tax_table)
       fluidPage(
         fluidRow(
@@ -193,6 +211,41 @@ server <- function(input, output, session) {
           column(6,
                  # sub UI dependent on the input of the DTRank
                  uiOutput("CoocSample"))
+        )
+      )
+    # if the chosen visualization is the phylogenetic tree the sidebar will contain
+    # it will contain the subUI that enables the choice of how many of the most
+    # abundant sequences are to be included within the visualization as well as the
+    # option to define the dimensions of the main panel and the resulting graph
+    } else if (input$VisC == "ptree")
+    {
+      fluidPage(
+        fluidRow(
+          # a subUI that will enable the choice of how many of the most abundant
+          # sequence are to be included in the plot - the subUI will vary depending
+          # on what the user chose to display
+          uiOutput("TopXSelect")
+        ),
+        fluidRow(
+          column(6,
+                 # input to define the width of the plot
+                 selectInput("PWidth",
+                             "Plot width",
+                             choices = list("100%" = "100%",
+                                            "800px" = "800px",
+                                            "1200px" = "1200px",
+                                            "1600px" = "1600px"),
+                             selected = "100%")
+          ),
+          column(6,
+                 # input to define the height of the plot
+                 selectInput("PHeight",
+                             "Plot height",
+                             choices = list("600px" = "600px",
+                                            "900px" = "900px",
+                                            "1200px" = "1200px"),
+                             selected = "600px")
+          )
         )
       )
     }
@@ -322,6 +375,10 @@ server <- function(input, output, session) {
                                       input$SpecSelect))
 
   #------------------------------->Define the contents of the main panel
+  # the main visualization output - it contains a subUI that is only displayed if
+  # a folder containing a usable IlluminaAnalysis.RData file has been selected
+  # and will otherwise display error messages depending on what the selected folder
+  # does contain
   output$DVmain <- renderUI({
     fluidPage(
       fluidRow(
@@ -342,6 +399,9 @@ server <- function(input, output, session) {
 
   })
 
+  # the subUI for the mainpanel that will be enabled if the IlluminaAnalysis.RData
+  # file exists within the selected folder the contents of the main panel will
+  # depend on the chosen visualization option
   output$DVmain2 <- renderUI({
     if(Status() == "acceptable"){
       if(input$VisC == "CoocDT"){
@@ -350,10 +410,19 @@ server <- function(input, output, session) {
         } else {
           DTOutput("CoocT")
         }
-      } else {
-        plotlyOutput("plot",
+      # enable a plotly output for the heatmap and the barplot visualization
+      } else if (input$VisC %in% c("hmap", "BarP"))
+      {
+        plotlyOutput("plotlyplot",
                      width = input$PWidth,
                      height = input$PHeight)
+      # enable a plot (ggplot) output for the phylogenetic tree and the Co-occurance
+      # overview options
+      } else if (input$VisC %in% c("CoocOV", "ptree"))
+      {
+        plotOutput("plot",
+                   width = input$PWidth,
+                   height = input$PHeight)
       }
     }
   })
@@ -371,7 +440,7 @@ server <- function(input, output, session) {
          to inspect or another taxonomic rank.")
   })
 
-  output$plot <- renderPlotly({
+  output$plotlyplot <- renderPlotly({
     if (input$VisC == "BarP") {
       NGS.shiny.helper::plot_barplot(genera = get(input$TRankC),
                               samples = input$SampleC,
@@ -382,8 +451,41 @@ server <- function(input, output, session) {
                               samples = input$SampleC,
                               lowercutoff = input$TopX[1],
                               uppercutoff = input$TopX[2])
-    } else if (input$ VisC == "ptree") {
+    }
+  })
 
+  output$plot <- renderPlot({
+    if (input$VisC == "ptree") {
+      if (exists("skipedTree"))
+      {
+        if (skipedTree == F)
+        {
+          treecontent <- phyloseq::prune_taxa(
+            names(
+              sort(
+                phyloseq::taxa_sums(CompletePhyl),
+                decreasing = T
+              ))[1:input$TopX],
+            CompletePhyl)
+          phyloseq::plot_tree(treecontent,
+                              label.tips = input$TRankC,
+                              ladderize = T,
+                              color = "Sample")
+        }
+
+      } else {
+        treecontent <- phyloseq::prune_taxa(
+          names(
+            sort(
+              phyloseq::taxa_sums(CompletePhyl),
+              decreasing = T
+            ))[1:input$TopX],
+          CompletePhyl)
+        phyloseq::plot_tree(treecontent,
+                            label.tips = input$TRankC,
+                            ladderize = T,
+                            color = "Sample")
+      }
     }
   })
 
