@@ -1,5 +1,14 @@
+05.03.2021
+  - changes the variables within the IlluminaAnalysis script into more self explanatory variables
+  - adjusted the long_name subscript to accomodate for the NA_kingdom option
+
+04.03.2021
+  - added more detailed commentary into the display app
+  - started implementing the phylogenetic tree into the display app
+  - disabled plotly for phylogenetic tree and Cooccurance overview
+
 03.03.2021
-  - created new GtiHub repositories for better integration
+  - created new GitHub repositories for better integration
   - integrated the option to skip the calculation of the phylogenetic tree
 
 27.10.2020

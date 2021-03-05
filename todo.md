@@ -1,5 +1,9 @@
 todo:
 
+- [ ] imidiate toDo:
+  - [ ] display tree and options
+  - [ ] the TopX Select for the tree
+
 - [ ] dada script (functionality):
   - [ ] integrate the functionality to disable the script breaking occuring when the Kingdom determination is NA
   - [x] implement file.exists into taxonomy analysis for folder creation
@@ -30,6 +34,7 @@ todo:
     - [x] tab for plots
   - [ ] estimated time of end
   - [x] systime
+  - [ ] include a select all / deselect all option for the sample selection in the display app if possible
 - other things
   - [ ] kontinuierliche Integration
   - [ ] markdown report
