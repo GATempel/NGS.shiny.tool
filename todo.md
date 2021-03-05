@@ -2,6 +2,7 @@ todo:
 
 - [ ] imidiate toDo:
   - [ ] display tree and options
+  - [ ] the TopX Select for the tree
 
 - [ ] dada script (functionality):
   - [ ] integrate the functionality to disable the script breaking occuring when the Kingdom determination is NA
