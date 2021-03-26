@@ -1,3 +1,6 @@
+26-03.2021
+  - adjusted the displayApp do include the skipedTree variable
+
 05.03.2021
   - changes the variables within the IlluminaAnalysis script into more self explanatory variables
   - adjusted the long_name subscript to accomodate for the NA_kingdom option

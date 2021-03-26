@@ -50,6 +50,8 @@ require("NGS.shiny.helper")
 Error000 <- read_file("./internal_files/html/ErrorV000.html")
 Error001 <- read_file("./internal_files/html/ErrorV001.html")
 Instructions <- read_file("./internal_files/html/InstrucV.html")
+NoTree <- read_file("./internal_files/html/NoTreeV.html")
+OldTree <- read_file("./internal_files/html/OldTreeV.html")
 
 #------------------------------------------------------------------------------------>User Interface
 ui <- tagList(
@@ -416,9 +418,31 @@ server <- function(input, output, session) {
         plotlyOutput("plotlyplot",
                      width = input$PWidth,
                      height = input$PHeight)
-      # enable a plot (ggplot) output for the phylogenetic tree and the Co-occurance
-      # overview options
-      } else if (input$VisC %in% c("CoocOV", "ptree"))
+      # enable a plot (ggplot) output for the phylogenetic tree option
+      } else if (input$VisC == "ptree")
+      {
+        # enable (ggplot) plot output only if the tree was not skipped
+        # first check if skipedTree object exists
+        if (exists("skipedTree"))
+        {
+          # only if the object exists its value can be checked
+          # if tree was not skipped create the corresponding plot output
+          if (!skipedTree)
+          {
+            plotOutput("plot",
+                       width = input$PWidth,
+                       height = input$PHeight)
+          } else
+          {
+            HTML(NoTree)
+          }
+
+        } else
+        {
+          HTML(OldTree)
+        }
+      # enable a plot (ggplot) output for the Cooccurance overview option
+      } else if ( input$VisC == "CoocOV")
       {
         plotOutput("plot",
                    width = input$PWidth,
@@ -443,49 +467,40 @@ server <- function(input, output, session) {
   output$plotlyplot <- renderPlotly({
     if (input$VisC == "BarP") {
       NGS.shiny.helper::plot_barplot(genera = get(input$TRankC),
-                              samples = input$SampleC,
-                              cutoff = input$TopX,
-                              modus = input$BarMode)
+                                     samples = input$SampleC,
+                                     cutoff = input$TopX,
+                                     modus = input$BarMode)
     } else if (input$VisC == "hmap") {
       NGS.shiny.helper::plot_heatmap(genera = get(input$TRankC),
-                              samples = input$SampleC,
-                              lowercutoff = input$TopX[1],
-                              uppercutoff = input$TopX[2])
+                                     samples = input$SampleC,
+                                     lowercutoff = input$TopX[1],
+                                     uppercutoff = input$TopX[2])
+    }
+  })
+
+  output$NoTree <- renderUI({
+    if (exists("skipedTree"))
+    {
+      HTML(NoTree)
+    } else
+    {
+      HTML(OldTree)
     }
   })
 
   output$plot <- renderPlot({
     if (input$VisC == "ptree") {
-      if (exists("skipedTree"))
-      {
-        if (skipedTree == F)
-        {
-          treecontent <- phyloseq::prune_taxa(
-            names(
-              sort(
-                phyloseq::taxa_sums(CompletePhyl),
-                decreasing = T
-              ))[1:input$TopX],
-            CompletePhyl)
-          phyloseq::plot_tree(treecontent,
-                              label.tips = input$TRankC,
-                              ladderize = T,
-                              color = "Sample")
-        }
-
-      } else {
-        treecontent <- phyloseq::prune_taxa(
-          names(
-            sort(
-              phyloseq::taxa_sums(CompletePhyl),
-              decreasing = T
-            ))[1:input$TopX],
-          CompletePhyl)
-        phyloseq::plot_tree(treecontent,
-                            label.tips = input$TRankC,
-                            ladderize = T,
-                            color = "Sample")
-      }
+      treecontent <- phyloseq::prune_taxa(
+        names(
+          sort(
+            phyloseq::taxa_sums(CompletePhyl),
+            decreasing = T
+          ))[1:input$TopX],
+        CompletePhyl)
+      phyloseq::plot_tree(treecontent,
+                          label.tips = input$TRankC,
+                          ladderize = T,
+                          color = "Sample")
     }
   })
 
