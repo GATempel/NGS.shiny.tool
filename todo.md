@@ -2,7 +2,8 @@ todo:
 
 - [ ] imidiate toDo:
   - [ ] display tree and options
-  - [ ] the TopX Select for the tree
+  - [x] the TopX Select for the tree
+  - [x] sample select for tree
 
 - [ ] dada script (functionality):
   - [ ] integrate the functionality to disable the script breaking occuring when the Kingdom determination is NA
@@ -32,15 +33,15 @@ todo:
   - [x] tabs
     - [x] session info
     - [x] tab for plots
-  - [ ] estimated time of end
+  - [ ] ~~estimated time of end~~ [currently impossible]
   - [x] systime
   - [ ] include a select all / deselect all option for the sample selection in the display app if possible
 - other things
   - [ ] kontinuierliche Integration
   - [ ] markdown report
-  - [ ] paketierung ! & dokumentation (roxygen)
+  - [ ] paketierung ! & dokumentation (roxygen) [teilweise in Arbeit]
     - [ ] use remotes package
-  - [ ] recherchieren welche datenbank Lukas für die Taxonomy Zuordnung genutzt hat
+  - [x] recherchieren welche datenbank Lukas für die Taxonomy Zuordnung genutzt hat
  
 priority:
 

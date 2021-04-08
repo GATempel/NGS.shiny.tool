@@ -1,5 +1,9 @@
-26-03.2021
+08.04.2021
+  - enabled sample selection for phylogenetic tree display
+
+26.03.2021
   - adjusted the displayApp do include the skipedTree variable
+  - clean up of IlluminaAnalysis script
 
 05.03.2021
   - changes the variables within the IlluminaAnalysis script into more self explanatory variables

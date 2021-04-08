@@ -147,7 +147,7 @@ server <- function(input, output, session) {
     # the selection of which Samples to visualize is disabled for the Co-occurance
     # and the phylogenetic tree
     # be analyzed as well as the dimensions of the plot within the mainpanel
-    if (!(input$VisC %in% c("CoocDT", "CoocOV", "ptree"))){
+    if (!(input$VisC %in% c("CoocDT", "CoocOV"))){
       fluidPage(
         fluidRow(
           # generates a checkbox Input enabling the selection of samples that are to
@@ -442,7 +442,7 @@ server <- function(input, output, session) {
           HTML(OldTree)
         }
       # enable a plot (ggplot) output for the Cooccurance overview option
-      } else if ( input$VisC == "CoocOV")
+      } else if (input$VisC == "CoocOV")
       {
         plotOutput("plot",
                    width = input$PWidth,
@@ -490,17 +490,26 @@ server <- function(input, output, session) {
 
   output$plot <- renderPlot({
     if (input$VisC == "ptree") {
-      treecontent <- phyloseq::prune_taxa(
-        names(
-          sort(
-            phyloseq::taxa_sums(CompletePhyl),
-            decreasing = T
-          ))[1:input$TopX],
-        CompletePhyl)
-      phyloseq::plot_tree(treecontent,
-                          label.tips = input$TRankC,
-                          ladderize = T,
-                          color = "Sample")
+      ChosenSamples <- input$SampleC
+      if (length(ChosenSamples > 0))
+      {
+        treecontent <- CompletePhyl
+        oldDF <- as(sample_data(treecontent), "data.frame")
+        newDF <- subset(oldDF, Samplename %in% ChosenSamples)
+        sample_data(treecontent) <- sample_data(newDF)
+        treecontent <- phyloseq::prune_taxa(
+          names(
+            sort(
+              phyloseq::taxa_sums(treecontent),
+              decreasing = TRUE
+            ))[1:input$TopX],
+          treecontent)
+        phyloseq::plot_tree(treecontent,
+                            label.tips = input$TRankC,
+                            ladderize = TRUE,
+                            color = "Sample")
+      }
+
     }
   })
 
