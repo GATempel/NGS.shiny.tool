@@ -2,6 +2,7 @@ todo:
 
 - [ ] imidiate toDo:
   - [ ] display tree and options
+    - [ ] add errormessage for non-existant subtree
   - [x] the TopX Select for the tree
   - [x] sample select for tree
 
@@ -9,7 +10,7 @@ todo:
   - [ ] integrate the functionality to disable the script breaking occuring when the Kingdom determination is NA
   - [x] implement file.exists into taxonomy analysis for folder creation
   - [x] create new tables per taxa
-  - [ ] illumina analysis
+  - [x] illumina analysis
     - [x] implement skipping of tree to save time
     - [x] add the trunc left as a variable
   - [ ] taxonomy analysis

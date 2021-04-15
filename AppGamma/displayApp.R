@@ -44,6 +44,8 @@ require("cooccur")
 require("plotly")
 # NGS.shiny.helper for a variety of helper functions
 require("NGS.shiny.helper")
+#
+require("phyloseq")
 
 
 # load the internal html files
@@ -543,15 +545,15 @@ server <- function(input, output, session) {
         treecontent <- CompletePhyl
         oldDF <- as(sample_data(treecontent), "data.frame")
         newDF <- subset(oldDF, Samplename %in% ChosenSamples)
-        sample_data(treecontent) <- sample_data(newDF)
+        phyloseq::sample_data(treecontent) <- phyloseq::sample_data(newDF)
 
         if ("Subtree" %in% options_chosen)
         {
-          oldMat <- as(tax_table(treecontent), "matrix")
+          oldMat <- as(phyloseq::tax_table(treecontent), "matrix")
           old_DF <- data.frame(oldMat)
           new_DF <- subset(old_DF, old_DF[as.integer(input$SubRank)] == input$SubUnit)
           newMat <- as(new_DF, "matrix")
-          tax_table(treecontent) <- tax_table(newMat)
+          phyloseq::tax_table(treecontent) <- phyloseq::tax_table(newMat)
         }
         treecontent <- phyloseq::prune_taxa(
           names(
