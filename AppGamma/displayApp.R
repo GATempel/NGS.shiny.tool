@@ -219,37 +219,6 @@ server <- function(input, output, session) {
     # it will contain the subUI that enables the choice of how many of the most
     # abundant sequences are to be included within the visualization as well as the
     # option to define the dimensions of the main panel and the resulting graph
-    } else if (input$VisC == "ptree")
-    {
-      fluidPage(
-        fluidRow(
-          # a subUI that will enable the choice of how many of the most abundant
-          # sequence are to be included in the plot - the subUI will vary depending
-          # on what the user chose to display
-          uiOutput("TopXSelect")
-        ),
-        fluidRow(
-          column(6,
-                 # input to define the width of the plot
-                 selectInput("PWidth",
-                             "Plot width",
-                             choices = list("100%" = "100%",
-                                            "800px" = "800px",
-                                            "1200px" = "1200px",
-                                            "1600px" = "1600px"),
-                             selected = "100%")
-          ),
-          column(6,
-                 # input to define the height of the plot
-                 selectInput("PHeight",
-                             "Plot height",
-                             choices = list("600px" = "600px",
-                                            "900px" = "900px",
-                                            "1200px" = "1200px"),
-                             selected = "600px")
-          )
-        )
-      )
     }
   })
 
@@ -296,6 +265,28 @@ server <- function(input, output, session) {
                  selectInput("TRankC",
                              "Select the taxonomic rank to display",
                              choices = as.list(TRank[2:length(TRank)]),
+                             selected = TRank[length(TRank) - 1])
+          )
+        ),
+        fluidRow(
+          uiOutput("AdditionalOptions")
+        )
+      )
+    } else if (input$VisC == "ptree"){
+      fluidPage(
+        fluidRow(
+          column(6,
+                 numericInput("TopX",
+                              "Top X sequences to plot:",
+                              value = 20,
+                              max = length(CompletePhyl@phy_tree$tip.label),
+                              min = 1 )
+          ),
+          column(6,
+                 selectInput("TRankC",
+                             "Select the relevant taxonomic rank",
+                             choices = c(as.list(TRank[2:length(TRank)]),
+                                         "Individual ASV" = "taxa_names"),
                              selected = TRank[length(TRank) - 1])
           )
         ),
@@ -366,11 +357,65 @@ server <- function(input, output, session) {
                  )
           )
       )
-    } else if (input$VisC == "hmap") {
-
-    } else if (input$VisC == "CoocOV") {}
+    } else if (input$VisC == "ptree") {
+      fluidPage(
+        fluidRow(
+          column(12,
+                 checkboxGroupInput(
+                   "treeOptions",
+                   "Additional Options",
+                   c("Subset tree to specific taxa" = "Subtree",
+                     "Hide labels" = "nolable",
+                     "Indicate Abundance" = "Abund")
+                 )
+                )
+        ),
+        fluidRow(
+          uiOutput("AdditionalOptions2")
+        )
+      )
+    }
   })
 
+  output$AdditionalOptions2 <- renderUI({
+    TRank <- colnames(CompletePhyl@tax_table)
+    options_chosen <- input$treeOptions
+    if("Subtree" %in% options_chosen)
+    {
+      rankOptions <- (1:length(TRank))
+      names(rankOptions) <- TRank
+      rankOptions <- rankOptions[-1]
+      fluidPage(
+        fluidRow(
+          column(12,
+                 selectInput("SubRank",
+                             "Select the taxonomic rank to subset",
+                             choices = as.list(rankOptions),
+                             selected = TRank[length(TRank) - 1]))
+        ),
+        fluidRow(
+          uiOutput("SubOption")
+        )
+      )
+    }
+  })
+
+  output$SubOption <- renderUI({
+    TRank <- colnames(CompletePhyl@tax_table)
+    Sub_Rank <- get(TRank[as.integer(input$SubRank)])
+    fluidPage(
+      fluidRow(
+        column(12,
+               selectInput("SubUnit",
+                           "Select the taxonomic unit to subset to",
+                           choices = as.list(Sub_Rank$Abundance$Name),
+                           selectize = TRUE))
+
+      )
+    )
+  })
+
+  Sub_Rank <- reactive(input$SubRank)
   sam_choice <- reactive(input$SampleC)
   DTRankC <- reactive(get(input$DTRank))
   CoocTable <- reactive(cooccur::pair(DTRankC()$Co_Occurance,
@@ -490,13 +535,24 @@ server <- function(input, output, session) {
 
   output$plot <- renderPlot({
     if (input$VisC == "ptree") {
+      options_chosen <- input$treeOptions
       ChosenSamples <- input$SampleC
+
       if (length(ChosenSamples > 0))
       {
         treecontent <- CompletePhyl
         oldDF <- as(sample_data(treecontent), "data.frame")
         newDF <- subset(oldDF, Samplename %in% ChosenSamples)
         sample_data(treecontent) <- sample_data(newDF)
+
+        if ("Subtree" %in% options_chosen)
+        {
+          oldMat <- as(tax_table(treecontent), "matrix")
+          old_DF <- data.frame(oldMat)
+          new_DF <- subset(old_DF, old_DF[as.integer(input$SubRank)] == input$SubUnit)
+          newMat <- as(new_DF, "matrix")
+          tax_table(treecontent) <- tax_table(newMat)
+        }
         treecontent <- phyloseq::prune_taxa(
           names(
             sort(
@@ -504,10 +560,17 @@ server <- function(input, output, session) {
               decreasing = TRUE
             ))[1:input$TopX],
           treecontent)
-        phyloseq::plot_tree(treecontent,
-                            label.tips = input$TRankC,
-                            ladderize = TRUE,
-                            color = "Sample")
+
+        if(is.null(phy_tree(treecontent, FALSE))) {
+          "test"
+        } else
+        {
+          phyloseq::plot_tree(treecontent,
+                              label.tips = input$TRankC,
+                              ladderize = TRUE,
+                              color = "Sample")
+        }
+
       }
 
     }

@@ -1,3 +1,9 @@
+15.04.2021
+  - enabled tree to be subset
+
+12.04.2021
+  - added additional options for phylogenetic tree
+
 08.04.2021
   - enabled sample selection for phylogenetic tree display
 
