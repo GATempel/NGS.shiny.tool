@@ -44,8 +44,10 @@ require("cooccur")
 require("plotly")
 # NGS.shiny.helper for a variety of helper functions
 require("NGS.shiny.helper")
-#
+# phyloseq options used in the generation of the tree
 require("phyloseq")
+# shinycssloader for the generation on loading animations
+require("shinycssloaders")
 
 
 # load the internal html files
@@ -217,10 +219,13 @@ server <- function(input, output, session) {
                  uiOutput("CoocSample"))
         )
       )
-    # if the chosen visualization is the phylogenetic tree the sidebar will contain
-    # it will contain the subUI that enables the choice of how many of the most
-    # abundant sequences are to be included within the visualization as well as the
-    # option to define the dimensions of the main panel and the resulting graph
+
+    } else {
+      fluidPage(
+        fluidRow(
+          uiOutput("TopXSelect")
+        )
+      )
     }
   })
 
@@ -237,21 +242,16 @@ server <- function(input, output, session) {
     {
       fluidPage(
         fluidRow(
-          column(6,
-                 sliderInput("TopX",
-                             "Top X sequences to plot:",
-                             max = 400,
-                             min = 1,
-                             value = c(1, 15) )
-          ),
-          column(6,
+          column(12,
                  selectInput("TRankC",
                              "Select the taxonomic rank by which to
                                     calculate the cooccurance",
                              choices = as.list(TRank[2:length(TRank)]),
                              selected = TRank[length(TRank) - 1])
           )
-        )
+        ),
+        fluidRow(
+          uiOutput("AdditionalOptions"))
       )
     } else if (input$VisC == "hmap"){
       fluidPage(
@@ -367,13 +367,26 @@ server <- function(input, output, session) {
                    "treeOptions",
                    "Additional Options",
                    c("Subset tree to specific taxa" = "Subtree",
-                     "Hide labels" = "nolable",
+                     "Hide labels" = "nolabel",
                      "Indicate Abundance" = "Abund")
                  )
                 )
         ),
         fluidRow(
           uiOutput("AdditionalOptions2")
+        )
+      )
+    } else if (input$VisC == "CoocOV") {
+      chosenRank <- get(input$TRankC)
+      fluidPage(
+        fluidRow(
+          column(12,
+                 sliderInput("TopX",
+                             "Top X sequences to plot:",
+                             max = nrow(chosenRank$Abundance),
+                             min = 1,
+                             value = c(1, 15) )
+          )
         )
       )
     }
@@ -462,9 +475,10 @@ server <- function(input, output, session) {
       # enable a plotly output for the heatmap and the barplot visualization
       } else if (input$VisC %in% c("hmap", "BarP"))
       {
-        plotlyOutput("plotlyplot",
-                     width = input$PWidth,
-                     height = input$PHeight)
+        shinycssloaders::withSpinner(
+          plotlyOutput("plotlyplot",
+                       width = input$PWidth,
+                       height = input$PHeight))
       # enable a plot (ggplot) output for the phylogenetic tree option
       } else if (input$VisC == "ptree")
       {
@@ -476,9 +490,12 @@ server <- function(input, output, session) {
           # if tree was not skipped create the corresponding plot output
           if (!skipedTree)
           {
-            plotOutput("plot",
-                       width = input$PWidth,
-                       height = input$PHeight)
+            shinycssloaders::withSpinner(
+              plotOutput("plot",
+                         width = input$PWidth,
+                         height = input$PHeight)
+            )
+
           } else
           {
             HTML(NoTree)
@@ -491,9 +508,10 @@ server <- function(input, output, session) {
       # enable a plot (ggplot) output for the Cooccurance overview option
       } else if (input$VisC == "CoocOV")
       {
-        plotOutput("plot",
-                   width = input$PWidth,
-                   height = input$PHeight)
+        shinycssloaders::withSpinner(plotOutput("plot",
+                                                width = input$PWidth,
+                                                height = input$PHeight))
+
       }
     }
   })
@@ -564,30 +582,87 @@ server <- function(input, output, session) {
           treecontent)
 
         if(is.null(phy_tree(treecontent, FALSE))) {
-          "test"
+          # create empty ggplot that only contains text
+          ggplot() +
+            annotate("text",
+                     x = 1,
+                     y = 1,
+                     size = 6,
+                     label = "The taxonomic unit selected for subsetting creates
+                     \na phylogenetic tree with only one branch.
+                     \nPlease select another unit to display a proper
+                     \nphylogenetic tree.") +
+            theme_void()
         } else
         {
-          phyloseq::plot_tree(treecontent,
-                              label.tips = input$TRankC,
-                              ladderize = TRUE,
-                              color = "Sample")
+          if ("nolabel" %in% options_chosen & "Abund" %in% options_chosen)
+          {
+            phyloseq::plot_tree(treecontent,
+                                size = "abundance",
+                                ladderize = TRUE,
+                                color = "Sample")
+          } else if ("Abund" %in% options_chosen)
+          {
+            phyloseq::plot_tree(treecontent,
+                                label.tips = input$TRankC,
+                                size = "abundance",
+                                ladderize = TRUE,
+                                color = "Sample")
+          } else if ("nolabel" %in% options_chosen)
+          {
+            phyloseq::plot_tree(treecontent,
+                                ladderize = TRUE,
+                                color = "Sample")
+          } else
+          {
+            phyloseq::plot_tree(treecontent,
+                                label.tips = input$TRankC,
+                                ladderize = TRUE,
+                                color = "Sample")
+          }
+
         }
 
       }
 
     }
+    else if (input$VisC == "CoocOV")
+    {
+      selected_Rank <- get(input$TRankC)
+      selected_names <- selected_Rank$Sorted_Names[input$TopX[1]:input$TopX[2]]
+      sel_Occur <- selected_Rank$Occurance
+      sel_Occur <- dplyr::filter(sel_Occur, Name %in% selected_names)
+      sel_Occur <- dplyr::select(sel_Occur, where(is.numeric))
+      sel_Cooccur <- cooccur::cooccur(sel_Occur, spp_names = TRUE)
+      plot(sel_Cooccur) + theme(legend.position = "bottom") +
+        ggtitle(paste0(input$TRankC, " Co-occurence Matrix"))
+    }
   })
 
 
   #------------------------------------>Data Visualization pure Server functions
+  # define the drivers object depending on the operating system
+  if (!is.null(Sys.info()))
+  {
+    if (Sys.info()["sysname"] == "Linux") {
+      rootdrive <- c(home = "~")
+    } else if (Sys.info()["sysname"] == "Windows")
+    {
+      posdrives <- paste0(letters, ":/")
+      names(posdrives) <- posdrives
+      rootdrive <- posdrives[dir.exists(posdrives)]
+    }
+  }
+
+
   # Define the root for the ShinyDirButton "Files"
   shinyDirChoose(input,
                  "File",
-                 roots = c(home = "~"))
+                 roots = rootdrive)
 
   # assign the path of the chosen directory from the "Files" DirButton to the
   # reactive variable DirChoice
-  DirChoice <- reactive(as.character(parseDirPath(c(home = "~"),
+  DirChoice <- reactive(as.character(parseDirPath(rootdrive,
                                                   input$File)))
 
   # create Status reactive variable to check the condition of the supplied

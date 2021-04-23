@@ -1,3 +1,15 @@
+23.04.2021
+  - fixed typo in shinycssloaders require command
+  - changed options of the folder selection to enalbe selection of drives on windows
+
+20.04.2021
+  - added Cooccurance overview matrix
+  - added shinycssloader animation over plots
+
+19.04.2021
+  - added message for empty subset phylogenetic tree
+  - added further options for phylogenetic tree
+
 15.04.2021
   - enabled tree to be subset
 
