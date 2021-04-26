@@ -1,3 +1,28 @@
+23.04.2021
+  - fixed typo in shinycssloaders require command
+  - changed options of the folder selection to enalbe selection of drives on windows
+
+20.04.2021
+  - added Cooccurance overview matrix
+  - added shinycssloader animation over plots
+
+19.04.2021
+  - added message for empty subset phylogenetic tree
+  - added further options for phylogenetic tree
+
+15.04.2021
+  - enabled tree to be subset
+
+12.04.2021
+  - added additional options for phylogenetic tree
+
+08.04.2021
+  - enabled sample selection for phylogenetic tree display
+
+26.03.2021
+  - adjusted the displayApp do include the skipedTree variable
+  - clean up of IlluminaAnalysis script
+
 05.03.2021
   - changes the variables within the IlluminaAnalysis script into more self explanatory variables
   - adjusted the long_name subscript to accomodate for the NA_kingdom option
