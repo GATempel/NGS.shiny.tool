@@ -651,6 +651,9 @@ server <- function(input, output, session) {
       posdrives <- paste0(letters, ":/")
       names(posdrives) <- posdrives
       rootdrive <- posdrives[dir.exists(posdrives)]
+    } else
+    {
+
     }
   }
 

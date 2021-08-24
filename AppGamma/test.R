@@ -175,3 +175,12 @@ output_list <- list(results = x,
                     spp_key = zz,
                     percent_sig = (((nrow(x[x$p_gt < 0.05 | x$p_lt < 0.05,]))) / (nrow(x))) * 100
 )
+
+
+for (i in 1:length(y)) {
+  if (grepl("^[[:digit:]]+$", y[i])) {
+    test[i] <- paste0("X", y[i])
+  } else {
+    test[i] <- y[i]
+  }
+}
